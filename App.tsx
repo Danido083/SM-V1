@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
-  Instagram, MessageCircle, MapPin, ChevronRight, Menu, X, ArrowLeft, Star, Plus, Minus, Send, Loader2, CheckCircle2, ShoppingBasket
+  Instagram, MessageCircle, MapPin, ChevronRight, Menu, X, ArrowLeft, Star, Plus, Minus, Send, Loader2, CheckCircle2, ShoppingBasket, AlertCircle
 } from 'lucide-react';
 
 // --- Interfaces ---
@@ -121,6 +121,7 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Modal State
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -131,10 +132,31 @@ const App: React.FC = () => {
   const [leadForm, setLeadForm] = useState<LeadData>({ name: '', whatsapp: '', city: '' });
 
   useEffect(() => {
-    fetch(API_URL).then(r => r.json()).then(data => {
-      setProducts(Array.isArray(data) ? data : (data.products || []));
-      setIsLoading(false);
-    }).catch(() => setIsLoading(false));
+    console.log('Passo 2: Iniciou App.tsx useEffect');
+
+    const fetchData = async () => {
+      try {
+        console.log('Passo 2.1: API chamada iniciada:', API_URL);
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Passo 2.2: API respondeu com sucesso', data);
+
+        setProducts(Array.isArray(data) ? data : (data.products || []));
+        setError(null);
+      } catch (err) {
+        console.error('Erro Passo 3: API falhou', err);
+        setError('Não foi possível carregar os produtos. Verifique sua conexão e tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
 
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -224,6 +246,17 @@ const App: React.FC = () => {
             <h2 className="text-[#007ACC] font-brand text-5xl md:text-6xl font-bold">Nossas Linhas</h2>
             <div className="w-24 h-1.5 bg-amber-400 mt-4 rounded-full mx-auto md:mx-0"></div>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl mb-8 flex items-center gap-4 animate-entrance shadow-sm">
+              <AlertCircle className="flex-shrink-0" size={24} />
+              <div>
+                <p className="font-bold font-brand text-lg">Erro ao carregar produtos</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          )}
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {Object.entries(CATEGORY_MAP).map(([key, info]) => (
               <ProductCard 
@@ -266,6 +299,12 @@ const App: React.FC = () => {
                   <div className="h-full flex flex-col items-center justify-center gap-4">
                     <Loader2 className="animate-spin text-[#007ACC]" size={40} />
                     <p className="font-brand font-bold text-gray-400">Carregando catálogo...</p>
+                  </div>
+                ) : error ? (
+                   <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                    <AlertCircle className="text-red-500" size={40} />
+                    <p className="font-brand font-bold text-gray-500">Não foi possível carregar os produtos.</p>
+                    <button onClick={() => window.location.reload()} className="text-[#007ACC] font-bold underline">Tentar novamente</button>
                   </div>
                 ) : filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
