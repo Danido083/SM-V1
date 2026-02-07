@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sorvetes Mauriti | O Sabor que Apaixonou o Nordeste</title>
+    
+    <!-- Meta Tags de Produção -->
+    <meta name="description" content="O legítimo sabor do Ceará. Picolés, sorvetes de 2L e açaí com a qualidade Mauriti.">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/x9X0ICd.png">
+
+    <!-- Frameworks & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+      /* --- Variáveis e Reset --- */
+      :root {
+        --color-primary: #007ACC;
+        --color-secondary: #FBBF24;
+        --color-bg-light: #F9FAFB;
+        --radius-brand: 3rem;
+        --transition-base: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        font-family: 'Nunito', sans-serif;
+        background-color: var(--color-primary);
+        color: #1F2937;
+        overflow-x: hidden;
+      }
+
+      .font-brand { font-family: 'Fredoka', sans-serif; }
+
+      /* --- Componentes Globais --- */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border: 1px border rgba(255, 255, 255, 0.2);
+      }
+
+      .btn-transition {
+        transition: var(--transition-base);
+      }
+
+      .btn-transition:active { transform: scale(0.95); }
+
+      /* --- Animações --- */
+      @keyframes slideUpFade {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-entrance {
+        animation: slideUpFade 0.8s ease-out forwards;
+      }
+
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
