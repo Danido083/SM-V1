@@ -23,7 +23,7 @@ interface LeadData {
 
 // --- Configurações & Helpers ---
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwQ24j5NGMok478uabPzb2PtvLbmknogRsY-AoceDlH1nzaaHoTP8QAz7dnM3aJU13-/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycby2FREtalZGsBTR0PaNLiuPmqPsNsUKn6ZkIZQlFvMyT_72f4V-mWK5XxOXgXyz4Vic/exec';
 const WHATSAPP_NUMBER = '558899310129';
 
 const normalizeStr = (str: string) =>
@@ -60,6 +60,12 @@ const CATEGORY_MAP: Record<string, { title: string; color: string; description: 
     color: 'bg-pink-50',
     description: 'Experiências exclusivas para paladares exigentes.',
     filter: (c) => normalizeStr(c) === 'gourmet'
+  },
+  'gelo': {
+    title: 'Gelo Sabor',
+    color: 'bg-cyan-50',
+    description: 'Refrescância pura para os dias quentes.',
+    filter: (c) => normalizeStr(c) === 'gelo'
   }
 };
 
