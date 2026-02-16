@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
+import {
   Instagram, MessageCircle, MapPin, ChevronRight, Menu, X, ArrowLeft, Star, Plus, Minus, Send, Loader2, CheckCircle2, ShoppingBasket
 } from 'lucide-react';
 
@@ -26,7 +26,7 @@ interface LeadData {
 const API_URL = 'https://script.google.com/macros/s/AKfycbyia-63G5ESBCu9sdRKRhHVceo7ijXO53tC85oCaS3dAnq6jUavHMyHX0GEV_G5c6j7/exec';
 const WHATSAPP_NUMBER = '558899310129';
 
-const normalizeStr = (str: string) => 
+const normalizeStr = (str: string) =>
   str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 const THEME = {
@@ -37,27 +37,27 @@ const THEME = {
 };
 
 const CATEGORY_MAP: Record<string, { title: string; color: string; description: string; filter: (c: string) => boolean }> = {
-  'picoles': { 
-    title: 'Nossos Picolés', 
-    color: 'bg-amber-50', 
+  'picoles': {
+    title: 'Nossos Picolés',
+    color: 'bg-amber-50',
     description: 'O frescor da fruta no palito, direto do Ceará.',
     filter: (c) => normalizeStr(c) === 'picole'
   },
-  'potes-2l': { 
-    title: 'Potes de 2 Litros', 
-    color: 'bg-blue-50', 
+  'potes-2l': {
+    title: 'Potes de 2 Litros',
+    color: 'bg-blue-50',
     description: 'Cremosidade em família para os melhores momentos.',
     filter: (c) => normalizeStr(c) === 'pote' || normalizeStr(c) === 'potes'
   },
-  'acai': { 
-    title: 'Energia Açaí', 
-    color: 'bg-purple-50', 
+  'acai': {
+    title: 'Energia Açaí',
+    color: 'bg-purple-50',
     description: 'O autêntico sabor da energia pura.',
     filter: (c) => normalizeStr(c) === 'acai'
   },
-  'gourmet': { 
-    title: 'Linha Gourmet', 
-    color: 'bg-pink-50', 
+  'gourmet': {
+    title: 'Linha Gourmet',
+    color: 'bg-pink-50',
     description: 'Experiências exclusivas para paladares exigentes.',
     filter: (c) => normalizeStr(c) === 'gourmet'
   }
@@ -80,9 +80,9 @@ const Toast: React.FC<{ message: string; visible: boolean }> = ({ message, visib
   </div>
 );
 
-const ProductCard: React.FC<{ 
-  product: Product; 
-  quantity: number; 
+const ProductCard: React.FC<{
+  product: Product;
+  quantity: number;
   onUpdateQty: (qty: number) => void;
   isHomeView?: boolean;
   onNavigate?: () => void;
@@ -121,7 +121,7 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Modal State
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<'products' | 'lead'>('products');
@@ -131,10 +131,34 @@ const App: React.FC = () => {
   const [leadForm, setLeadForm] = useState<LeadData>({ name: '', whatsapp: '', city: '' });
 
   useEffect(() => {
-    fetch(API_URL).then(r => r.json()).then(data => {
-      setProducts(Array.isArray(data) ? data : (data.products || []));
-      setIsLoading(false);
-    }).catch(() => setIsLoading(false));
+    console.log('🔄 Iniciando fetch de produtos...', API_URL);
+
+    fetch(API_URL)
+      .then(r => {
+        console.log('✅ Resposta recebida:', r.status, r.statusText);
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        return r.json();
+      })
+      .then(data => {
+        console.log('📦 Dados recebidos:', data);
+        const productList = Array.isArray(data) ? data : (data.products || []);
+        console.log('🍦 Produtos processados:', productList.length, 'itens');
+        setProducts(productList);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('❌ Erro ao carregar produtos:', error);
+        console.error('Detalhes do erro:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
+        setIsLoading(false);
+        // Mostrar erro ao usuário apenas em desenvolvimento
+        if (window.location.hostname === 'localhost') {
+          alert(`Erro ao carregar produtos: ${error.message}`);
+        }
+      });
 
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -152,7 +176,7 @@ const App: React.FC = () => {
   const handleSubmitLead = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const itemsOrdered = products.filter(p => cart[p.id] > 0).map(p => ({
       nome: p.name,
       quantidade: cart[p.id],
@@ -185,11 +209,11 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#007ACC] selection:bg-amber-100 selection:text-[#007ACC]">
       <Toast message="Pedido enviado com sucesso!" visible={toastVisible} />
-      
+
       {/* Header Fixo */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'}`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="flex items-center gap-2.5 group">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5 group">
             <img src="https://i.imgur.com/x9X0ICd.png" alt="Logo" className="w-10 h-10 object-contain transition-transform group-hover:scale-110" />
             <span className={`text-2xl font-brand font-bold ${scrolled ? 'text-[#007ACC]' : 'text-white'}`}>Mauriti</span>
           </button>
@@ -226,18 +250,18 @@ const App: React.FC = () => {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {Object.entries(CATEGORY_MAP).map(([key, info]) => (
-              <ProductCard 
-                key={key} 
-                isHomeView 
-                product={{ 
-                  id: key, 
-                  name: info.title, 
-                  description: info.description, 
+              <ProductCard
+                key={key}
+                isHomeView
+                product={{
+                  id: key,
+                  name: info.title,
+                  description: info.description,
                   img: key === 'picoles' ? 'https://i.imgur.com/mJfOgah.jpeg' : key === 'potes-2l' ? 'https://i.imgur.com/4YnqlcT.jpeg' : key === 'acai' ? 'https://i.imgur.com/VWPnpF8.jpeg' : 'https://i.imgur.com/o9FoKWl.jpeg',
                   category: key
-                }} 
-                quantity={0} 
-                onUpdateQty={() => {}} 
+                }}
+                quantity={0}
+                onUpdateQty={() => { }}
                 onNavigate={() => { setActiveCategory(key); setModalStep('products'); }}
               />
             ))}
@@ -249,7 +273,7 @@ const App: React.FC = () => {
       {activeCategory && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-blue-900/40 backdrop-blur-md animate-fadeIn">
           <div className={`bg-white w-full ${modalStep === 'products' ? 'max-w-5xl h-[85vh]' : 'max-w-md'} ${THEME.radius} shadow-3xl flex flex-col overflow-hidden animate-entrance`}>
-            
+
             {/* Header Modal */}
             <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
               <div>
@@ -270,7 +294,7 @@ const App: React.FC = () => {
                 ) : filteredProducts.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredProducts.map(p => (
-                      <ProductCard key={p.id} product={p} quantity={cart[p.id] || 0} onUpdateQty={(q) => setCart({...cart, [p.id]: q})} />
+                      <ProductCard key={p.id} product={p} quantity={cart[p.id] || 0} onUpdateQty={(q) => setCart({ ...cart, [p.id]: q })} />
                     ))}
                   </div>
                 ) : (
@@ -283,15 +307,15 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase text-[#007ACC] block mb-1 ml-2">Nome Completo</label>
-                    <input required type="text" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="Ex: João Silva" value={leadForm.name} onChange={e => setLeadForm({...leadForm, name: e.target.value})} />
+                    <input required type="text" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="Ex: João Silva" value={leadForm.name} onChange={e => setLeadForm({ ...leadForm, name: e.target.value })} />
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase text-[#007ACC] block mb-1 ml-2">WhatsApp</label>
-                    <input required type="tel" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="(00) 00000-0000" value={leadForm.whatsapp} onChange={e => setLeadForm({...leadForm, whatsapp: e.target.value})} />
+                    <input required type="tel" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="(00) 00000-0000" value={leadForm.whatsapp} onChange={e => setLeadForm({ ...leadForm, whatsapp: e.target.value })} />
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase text-[#007ACC] block mb-1 ml-2">Sua Cidade</label>
-                    <input required type="text" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="Ex: Mauriti - CE" value={leadForm.city} onChange={e => setLeadForm({...leadForm, city: e.target.value})} />
+                    <input required type="text" className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold" placeholder="Ex: Mauriti - CE" value={leadForm.city} onChange={e => setLeadForm({ ...leadForm, city: e.target.value })} />
                   </div>
                 </form>
               )}
@@ -308,7 +332,7 @@ const App: React.FC = () => {
                       <p className="text-xl font-brand font-bold text-[#007ACC]">{totalItems} sabores</p>
                     </div>
                   </div>
-                  <button 
+                  <button
                     disabled={totalItems === 0}
                     onClick={() => setModalStep('lead')}
                     className="w-full md:w-auto bg-[#007ACC] text-white px-10 py-5 rounded-2xl font-brand font-bold text-lg shadow-xl hover:bg-[#005c99] transition-all disabled:opacity-50 disabled:grayscale"
@@ -317,7 +341,7 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <button 
+                <button
                   form="leadForm"
                   disabled={isSubmitting}
                   className="w-full bg-[#007ACC] text-white py-5 rounded-2xl font-brand font-bold text-xl shadow-xl flex items-center justify-center gap-3 hover:bg-[#005c99] transition-all disabled:opacity-50"
