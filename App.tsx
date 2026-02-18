@@ -97,7 +97,14 @@ const ProductCard: React.FC<{
     <article className={`bg-white p-5 ${THEME.radius} shadow-xl hover:shadow-2xl transition-all group border border-transparent hover:border-[#007ACC]/10 relative flex flex-col h-full`}>
       {product.tag && <Badge text={product.tag} />}
       <div className="aspect-square rounded-[2rem] overflow-hidden mb-4 bg-gray-50 shadow-inner">
-        <img src={product.img || 'https://via.placeholder.com/400?text=Sorvetes+Mauriti'} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+        {product.img ? (
+          <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-amber-50">
+            <span className="text-5xl">🍦</span>
+            <span className="text-xs text-gray-400 mt-2 font-medium text-center px-2">{product.name.split(' - ')[0]}</span>
+          </div>
+        )}
       </div>
       <div className="flex-grow">
         <h3 className="text-lg font-brand font-bold text-gray-800 mb-1 leading-tight">{product.name}</h3>
@@ -172,38 +179,49 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log('🔄 Iniciando fetch de produtos...', API_URL);
 
-    fetch(API_URL)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+      console.warn('⏱️ API demorou demais — usando fallback');
+      setProducts(FALLBACK_PRODUCTS);
+      setIsLoading(false);
+    }, 5000);
+
+    fetch(API_URL, { signal: controller.signal })
       .then(r => {
         console.log('✅ Resposta recebida:', r.status, r.statusText);
         if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
         return r.json();
       })
       .then(data => {
+        clearTimeout(timeout);
         console.log('📦 Dados recebidos:', data);
         const productList = Array.isArray(data) ? data : (data.products || []);
         console.log('🍦 Produtos processados:', productList.length, 'itens');
         if (productList.length > 0) {
           setProducts(productList);
         } else {
-          console.warn('⚠️ API retornou vazio, usando dados de fallback');
+          console.warn('⚠️ API retornou vazio, usando fallback');
           setProducts(FALLBACK_PRODUCTS);
         }
         setIsLoading(false);
       })
       .catch(error => {
-        console.error('❌ Erro ao carregar produtos:', error);
-        console.warn('⚠️ Usando dados de fallback');
+        clearTimeout(timeout);
+        if (error.name !== 'AbortError') {
+          console.error('❌ Erro ao carregar produtos:', error);
+        }
         setProducts(FALLBACK_PRODUCTS);
         setIsLoading(false);
-        // Mostrar erro ao usuário apenas em desenvolvimento
-        if (window.location.hostname === 'localhost') {
-          alert(`Erro ao carregar produtos: ${error.message}`);
-        }
       });
 
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const totalItems = (Object.values(cart) as number[]).reduce((a, b) => a + b, 0);
