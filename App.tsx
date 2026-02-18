@@ -23,7 +23,7 @@ interface LeadData {
 
 // --- Configurações & Helpers ---
 
-const API_URL = 'https://script.google.com/macros/s/AKfycby2FREtalZGsBTR0PaNLiuPmqPsNsUKn6ZkIZQlFvMyT_72f4V-mWK5XxOXgXyz4Vic/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzT6VNI9PO4rlhOEwoi-R5ou_GhBfsHPIm2Ki7-dBgr31RlauLUsR7YjLXzAugjlYIu/exec';
 const WHATSAPP_NUMBER = '558899310129';
 
 const normalizeStr = (str: string) =>
