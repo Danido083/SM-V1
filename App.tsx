@@ -263,7 +263,7 @@ const App: React.FC = () => {
                   id: key,
                   name: info.title,
                   description: info.description,
-                  img: key === 'picoles' ? 'https://i.imgur.com/mJfOgah.jpeg' : key === 'potes-2l' ? 'https://i.imgur.com/4YnqlcT.jpeg' : key === 'acai' ? 'https://i.imgur.com/VWPnpF8.jpeg' : 'https://i.imgur.com/o9FoKWl.jpeg',
+                  img: key === 'picoles' ? 'https://i.imgur.com/mJfOgah.jpeg' : key === 'potes-2l' ? 'https://i.imgur.com/4YnqlcT.jpeg' : key === 'acai' ? 'https://i.imgur.com/VWPnpF8.jpeg' : key === 'gelo' ? 'https://res.cloudinary.com/domma0qk3/image/upload/v1770150028/gelo_sabor_energetico-Photoroom_eiwshm.png' : 'https://i.imgur.com/o9FoKWl.jpeg',
                   category: key
                 }}
                 quantity={0}
