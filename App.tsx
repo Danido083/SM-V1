@@ -121,6 +121,39 @@ const ProductCard: React.FC<{
   );
 };
 
+// --- Dados de Fallback ---
+
+const FALLBACK_PRODUCTS: Product[] = [
+  { id: 1001, name: 'Sundae - Chocolate e Flocos', category: 'potes', img: '', description: 'Chocolate e Flocos' },
+  { id: 1002, name: 'Copão Sedução napolitano', category: 'potes', img: '', description: 'Morango, Creme e chocolate' },
+  { id: 1003, name: 'Cremosinho - Azul do céu', category: 'picole', img: '', description: 'Sabor Principal' },
+  { id: 1004, name: 'Cremosinho - Morango', category: 'picole', img: '', description: 'Morango cremoso' },
+  { id: 1005, name: 'Cremosinho - Leite Condensado', category: 'picole', img: '', description: 'Leite condensado' },
+  { id: 1006, name: 'Mauricone - Brigadeiro', category: 'potes', img: '', description: 'Brigadeiro' },
+  { id: 1007, name: 'Mauricone - Morango', category: 'potes', img: '', description: 'Morango' },
+  { id: 1008, name: 'Mauricone - Leitinho com trufas', category: 'potes', img: '', description: 'Leite cremoso com trufas' },
+  { id: 1009, name: 'Mauriti - açaí 1L', category: 'acai', img: '', description: 'Açaí Puro' },
+  { id: 1010, name: 'Mauriti - açaí - potinho', category: 'acai', img: '', description: 'Açaí Puro' },
+  { id: 1011, name: 'Napolicreme - 4 em 1 - Pote 2L', category: 'potes', img: '', description: 'Morango, Baunilha, Creme e chocolate' },
+  { id: 1012, name: 'Plus + Sorvete e Calda', category: 'potes', img: '', description: 'Frutas vermelhas' },
+  { id: 1013, name: 'Pavê - pote 1L', category: 'potes', img: '', description: 'Pavê' },
+  { id: 1014, name: 'Potinho sensação - Leitinho com trufas', category: 'potes', img: '', description: 'Leite cremoso com trufas' },
+  { id: 1015, name: 'Picolé cremoso - amendoim', category: 'picole', img: '', description: 'Amendoim' },
+  { id: 1016, name: 'Picolé cremoso - Chocolate', category: 'picole', img: '', description: 'Chocolate' },
+  { id: 1017, name: 'Picolé cremoso - Tapioca', category: 'picole', img: '', description: 'Tapioca' },
+  { id: 1018, name: 'Picolé cremoso - Açaí com banana', category: 'picole', img: '', description: 'açaí e banana' },
+  { id: 1019, name: 'Picolé cremoso - Morango', category: 'picole', img: '', description: 'Morango' },
+  { id: 1020, name: 'Picolé cremoso - Coco', category: 'picole', img: '', description: 'Coco' },
+  { id: 1021, name: 'Picolé crocante branco', category: 'picole', img: '', description: 'Chocolate branco' },
+  { id: 1022, name: 'Picolé - Linha frutas: Limão', category: 'picole', img: '', description: 'Limão' },
+  { id: 1023, name: 'Picolé - Linha frutas: Tamarindo', category: 'picole', img: '', description: 'Tamarindo' },
+  { id: 1024, name: 'Picolé - linha frutas: Cajá', category: 'picole', img: '', description: 'Cajá' },
+  { id: 1025, name: 'Gelo sabor energético', category: 'gelo', img: 'https://res.cloudinary.com/domma0qk3/image/upload/v1770150028/gelo_sabor_energetico-Photoroom_eiwshm.png', description: 'Energético' },
+  { id: 1026, name: 'Gelo sabor coco', category: 'gelo', img: '', description: 'Coco' },
+  { id: 1027, name: 'Paletas recheadas - Banana', category: 'picole', img: '', description: 'Banana e leite condensado' },
+  { id: 1028, name: 'Paletas recheadas - Morango', category: 'picole', img: '', description: 'Morango e Leite condensado' },
+];
+
 // --- View Principal ---
 
 const App: React.FC = () => {
@@ -149,16 +182,18 @@ const App: React.FC = () => {
         console.log('📦 Dados recebidos:', data);
         const productList = Array.isArray(data) ? data : (data.products || []);
         console.log('🍦 Produtos processados:', productList.length, 'itens');
-        setProducts(productList);
+        if (productList.length > 0) {
+          setProducts(productList);
+        } else {
+          console.warn('⚠️ API retornou vazio, usando dados de fallback');
+          setProducts(FALLBACK_PRODUCTS);
+        }
         setIsLoading(false);
       })
       .catch(error => {
         console.error('❌ Erro ao carregar produtos:', error);
-        console.error('Detalhes do erro:', {
-          message: error.message,
-          name: error.name,
-          stack: error.stack
-        });
+        console.warn('⚠️ Usando dados de fallback');
+        setProducts(FALLBACK_PRODUCTS);
         setIsLoading(false);
         // Mostrar erro ao usuário apenas em desenvolvimento
         if (window.location.hostname === 'localhost') {
