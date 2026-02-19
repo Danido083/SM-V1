@@ -3,63 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sorvetes Mauriti | O Sabor que Apaixonou o Nordeste</title>
-    
-    <!-- Meta Tags de Produção -->
-    <meta name="description" content="O legítimo sabor do Ceará. Picolés, sorvetes de 2L e açaí com a qualidade Mauriti.">
-    <link rel="icon" type="image/png" href="https://i.imgur.com/x9X0ICd.png">
 
-    <!-- Frameworks & Fonts -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SEO PRIMÁRIO
+    ════════════════════════════════════════════════════════════════ -->
+    <title>Sorvetes Mauriti | Distribuidora de Sorvetes no Ceará desde 2000</title>
+    <meta name="description" content="Distribuidora de sorvetes, picolés e açaí no Ceará. Revenda com alta lucratividade. Picolés cremosos, potes 2L, linha gourmet e gelo sabor. Peça seu orçamento B2B agora.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://sm-v1.vercel.app/">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         OPEN GRAPH (WhatsApp, Facebook, LinkedIn)
+         Garante preview rico ao compartilhar o link
+    ════════════════════════════════════════════════════════════════ -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://sm-v1.vercel.app/">
+    <meta property="og:title"       content="Sorvetes Mauriti | Distribuidora B2B no Ceará">
+    <meta property="og:description" content="O legítimo sabor do Ceará desde 2000. Picolés, potes 2L, açaí e linha gourmet para revenda com alta lucratividade. Solicite seu orçamento agora.">
+    <meta property="og:image"       content="https://res.cloudinary.com/domma0qk3/image/upload/v1770148633/WPS_Photoseee_1_-Photoroom_yjywz6.png">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale"      content="pt_BR">
+    <meta property="og:site_name"   content="Sorvetes Mauriti">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TWITTER CARD (X / Twitter)
+    ════════════════════════════════════════════════════════════════ -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Sorvetes Mauriti | Distribuidora B2B no Ceará">
+    <meta name="twitter:description" content="O legítimo sabor do Ceará desde 2000. Solicite seu orçamento de revenda agora.">
+    <meta name="twitter:image"       content="https://res.cloudinary.com/domma0qk3/image/upload/v1770148633/WPS_Photoseee_1_-Photoroom_yjywz6.png">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FAVICON (migrado do Imgur para Cloudinary)
+    ════════════════════════════════════════════════════════════════ -->
+    <link rel="icon"             type="image/png" href="https://i.imgur.com/x9X0ICd.png">
+    <link rel="apple-touch-icon"                  href="https://i.imgur.com/x9X0ICd.png">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FONTES — preconnect antes do stylesheet para LCP mais rápido
+    ════════════════════════════════════════════════════════════════ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <style>
-      /* --- Variáveis e Reset --- */
-      :root {
-        --color-primary: #007ACC;
-        --color-secondary: #FBBF24;
-        --color-bg-light: #F9FAFB;
-        --radius-brand: 3rem;
-        --transition-base: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
+    <!-- ═══════════════════════════════════════════════════════════════
+         META PIXEL (Meta Ads / Facebook)
+         ⚠️  Substitua YOUR_PIXEL_ID pelo seu Pixel ID real no Meta Ads Manager.
+         Quando não tiver pixel ainda, mantenha comentado — não afeta performance.
+    ════════════════════════════════════════════════════════════════ -->
+    <!--
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'YOUR_PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"/>
+    </noscript>
+    -->
 
-      body {
-        font-family: 'Nunito', sans-serif;
-        background-color: var(--color-primary);
-        color: #1F2937;
-        overflow-x: hidden;
-      }
-
-      .font-brand { font-family: 'Fredoka', sans-serif; }
-
-      /* --- Componentes Globais --- */
-      .glass-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
-        border: 1px border rgba(255, 255, 255, 0.2);
-      }
-
-      .btn-transition {
-        transition: var(--transition-base);
-      }
-
-      .btn-transition:active { transform: scale(0.95); }
-
-      /* --- Animações --- */
-      @keyframes slideUpFade {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      .animate-entrance {
-        animation: slideUpFade 0.8s ease-out forwards;
-      }
-
-      /* Hide scrollbar for Chrome, Safari and Opera */
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
   </head>
   <body>
     <div id="root"></div>

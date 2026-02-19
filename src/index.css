@@ -1,0 +1,85 @@
+/*
+ * src/index.css
+ * Ponto de entrada do CSS global — processa o Tailwind via PostCSS (build local).
+ * Este arquivo substitui o <script src="cdn.tailwindcss.com"> do index.html.
+ */
+
+/* ─── Tailwind v4 ────────────────────────────────────────────────────────────── */
+@import "tailwindcss";
+
+/* ─── Variáveis globais ──────────────────────────────────────────────────────── */
+:root {
+  --color-primary: #007ACC;
+  --color-secondary: #FBBF24;
+  --color-bg-light: #F9FAFB;
+  --radius-brand: 3rem;
+  --transition-base: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Reset e base ──────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: var(--color-primary);
+  color: #1F2937;
+  overflow-x: hidden;
+}
+
+.font-brand {
+  font-family: 'Fredoka', sans-serif;
+}
+
+/* ─── Componentes globais ───────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-transition {
+  transition: var(--transition-base);
+}
+
+.btn-transition:active {
+  transform: scale(0.95);
+}
+
+/* ─── Animações ─────────────────────────────────────────────────────────────── */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-entrance {
+  animation: slideUpFade 0.8s ease-out forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
