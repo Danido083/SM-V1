@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Instagram, MessageCircle, ChevronRight, Send, Loader2, ShoppingBasket, X } from 'lucide-react';
+import { ChevronRight, Send, Loader2, ShoppingBasket, X } from 'lucide-react';
 
 import { Toast } from './src/components/ui/Toast';
 import { ProductCard } from './src/components/ui/ProductCard';
+import { Layout } from './src/components/Layout';
 import { useProducts } from './src/hooks/useProducts';
 import { useCart } from './src/hooks/useCart';
-import { CATEGORY_MAP, WHATSAPP_NUMBER, THEME, API_URL } from './src/config/constants';
+import { useOrderSubmit } from './src/features/checkout/hooks/useOrderSubmit';
+import { CATEGORY_MAP, THEME } from './src/config/constants';
 import { LeadData } from './src/features/catalog/types';
 
 const INITIAL_LEAD: LeadData = { name: '', whatsapp: '', city: '' };
@@ -15,23 +17,12 @@ const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<'products' | 'lead'>('products');
   const [leadForm, setLeadForm] = useState<LeadData>(INITIAL_LEAD);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
 
   const { products, isLoading } = useProducts();
   const { cart, totalItems, updateQty, clearCart } = useCart();
 
-  // Scroll listener para o header
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const filteredProducts = useMemo(() => {
-    if (!activeCategory) return [];
-    return products.filter((p) => CATEGORY_MAP[activeCategory].filter(p.category));
-  }, [activeCategory, products]);
+  // ─── Handlers de navegação ─────────────────────────────────────────────────
 
   const openCategory = (key: string, step: 'products' | 'lead' = 'products') => {
     setActiveCategory(key);
@@ -43,82 +34,51 @@ const App: React.FC = () => {
     setModalStep('products');
   };
 
-  const handleSubmitLead = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // ─── Hook de submissão (toda lógica de negócio encapsulada) ────────────────
 
-    const itemsOrdered = products
-      .filter((p) => (cart[p.id] ?? 0) > 0)
-      .map((p) => ({ nome: p.name, quantidade: cart[p.id], categoria: p.category }));
-
-    const payload = { lead: leadForm, pedido: itemsOrdered, data: new Date().toISOString() };
-
-    try {
-      await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-
+  const { submit, isSubmitting } = useOrderSubmit(products, cart, {
+    onSuccess: () => {
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 5000);
-
-      const orderText = itemsOrdered.map((i) => `• ${i.quantidade}x ${i.nome}`).join('\n');
-      const msg = encodeURIComponent(
-        `🚀 *Novo Orçamento B2B*\n\n*Cliente:* ${leadForm.name}\n*Cidade:* ${leadForm.city}\n\n*Pedido:*\n${orderText}\n\nAguardo contato!`
-      );
-
+      // O redirect para o WhatsApp já acontece dentro do hook
       setTimeout(() => {
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
         closeModal();
         clearCart();
         setLeadForm(INITIAL_LEAD);
       }, 1000);
-    } catch {
+    },
+    onError: () => {
       alert('Erro ao enviar. Tente novamente.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+  });
+
+  // ─── Evento de submit do formulário ───────────────────────────────────────
+
+  const handleSubmitLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submit(leadForm);
   };
 
-  return (
-    <div className="min-h-screen bg-[#007ACC] selection:bg-amber-100 selection:text-[#007ACC]">
-      <Toast message="Pedido enviado com sucesso!" visible={toastVisible} />
+  // ─── Scroll listener ───────────────────────────────────────────────────────
 
-      {/* Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg py-2' : 'bg-transparent py-4'
-          }`}
-      >
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2.5 group"
-          >
-            <img
-              src="https://i.imgur.com/x9X0ICd.png"
-              alt="Logo Mauriti"
-              className="w-10 h-10 object-contain transition-transform group-hover:scale-110"
-            />
-            <span className={`text-2xl font-brand font-bold ${scrolled ? 'text-[#007ACC]' : 'text-white'}`}>
-              Mauriti
-            </span>
-          </button>
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="#sabores"
-              className={`font-bold uppercase tracking-widest text-[11px] ${scrolled ? 'text-gray-800' : 'text-white'}`}
-            >
-              Sabores
-            </a>
-            <button
-              onClick={() => openCategory('picoles', 'lead')}
-              className="bg-amber-400 text-[#007ACC] px-7 py-2.5 rounded-full font-brand font-bold hover:bg-amber-500 shadow-md transition-all"
-            >
-              Revenda Agora
-            </button>
-          </nav>
-        </div>
-      </header>
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // ─── Produtos filtrados ────────────────────────────────────────────────────
+
+  const filteredProducts = useMemo(() => {
+    if (!activeCategory) return [];
+    return products.filter((p) => CATEGORY_MAP[activeCategory].filter(p.category));
+  }, [activeCategory, products]);
+
+  // ─── Render ────────────────────────────────────────────────────────────────
+
+  return (
+    <Layout scrolled={scrolled} onOpenQuote={() => openCategory('picoles', 'lead')}>
+      <Toast message="Pedido enviado com sucesso!" visible={toastVisible} />
 
       {/* Hero */}
       <section className="min-h-screen flex items-center pt-24 overflow-hidden relative bg-[#007ACC]">
@@ -132,7 +92,8 @@ const App: React.FC = () => {
               <span className="text-amber-400">Coração.</span>
             </h1>
             <p className="text-lg opacity-90 max-w-md font-medium leading-relaxed">
-              Desde 2000, levando o frescor das frutas e o sabor inesquecível do Nordeste para a sua mesa.
+              Desde 2000, levando o frescor das frutas e o sabor inesquecível do Nordeste para a sua
+              mesa.
             </p>
             <a
               href="#sabores"
@@ -155,7 +116,9 @@ const App: React.FC = () => {
       <section id="sabores" className="py-32 bg-white rounded-t-[4rem] -mt-16 relative z-20">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center md:text-left">
-            <h2 className="text-[#007ACC] font-brand text-5xl md:text-6xl font-bold">Nossas Linhas</h2>
+            <h2 className="text-[#007ACC] font-brand text-5xl md:text-6xl font-bold">
+              Nossas Linhas
+            </h2>
             <div className="w-24 h-1.5 bg-amber-400 mt-4 rounded-full mx-auto md:mx-0" />
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -236,7 +199,11 @@ const App: React.FC = () => {
                         type={field === 'whatsapp' ? 'tel' : 'text'}
                         className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold"
                         placeholder={
-                          field === 'name' ? 'Ex: João Silva' : field === 'whatsapp' ? '(00) 00000-0000' : 'Ex: Mauriti - CE'
+                          field === 'name'
+                            ? 'Ex: João Silva'
+                            : field === 'whatsapp'
+                              ? '(00) 00000-0000'
+                              : 'Ex: Mauriti - CE'
                         }
                         value={leadForm[field]}
                         onChange={(e) => setLeadForm((prev) => ({ ...prev, [field]: e.target.value }))}
@@ -256,7 +223,9 @@ const App: React.FC = () => {
                       <ShoppingBasket size={24} />
                     </div>
                     <div>
-                      <p className="text-xs font-black uppercase tracking-tighter text-gray-400">Itens Selecionados</p>
+                      <p className="text-xs font-black uppercase tracking-tighter text-gray-400">
+                        Itens Selecionados
+                      </p>
                       <p className="text-xl font-brand font-bold text-[#007ACC]">{totalItems} sabores</p>
                     </div>
                   </div>
@@ -281,32 +250,7 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="bg-[#002B45] text-white pt-24 pb-12 rounded-t-[4rem]">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center gap-6 mb-12">
-            <a
-              href="https://instagram.com/sorvetesmauriti"
-              className="bg-white/10 p-4 rounded-full hover:bg-[#007ACC] transition-all"
-              aria-label="Instagram"
-            >
-              <Instagram />
-            </a>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}`}
-              className="bg-white/10 p-4 rounded-full hover:bg-[#007ACC] transition-all"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle />
-            </a>
-          </div>
-          <p className="text-gray-500 font-bold text-[10px] tracking-[0.4em] uppercase">
-            © {new Date().getFullYear()} Sorvetes Mauriti | O Legítimo Sabor do Ceará
-          </p>
-        </div>
-      </footer>
-    </div>
+    </Layout>
   );
 };
 

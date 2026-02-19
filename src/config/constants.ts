@@ -1,7 +1,19 @@
 // Configurações globais da aplicação
 
-export const API_URL =
-    'https://script.google.com/macros/s/AKfycbzT6VNI9PO4rlhOEwoi-R5ou_GhBfsHPIm2Ki7-dBgr31RlauLUsR7YjLXzAugjlYIu/exec';
+/**
+ * URL da API (Google Apps Script).
+ * Defina VITE_API_URL no arquivo .env.local — jamais commite a URL real.
+ *
+ * ⚠️  Se esta variável não estiver definida no ambiente, um erro é lançado
+ *     imediatamente para facilitar o debug em desenvolvimento.
+ */
+const rawApiUrl = import.meta.env.VITE_API_URL;
+if (!rawApiUrl) {
+    throw new Error(
+        '[Mauriti] VITE_API_URL não encontrada. Crie o arquivo .env.local com VITE_API_URL=<sua_url>',
+    );
+}
+export const API_URL: string = rawApiUrl;
 
 export const WHATSAPP_NUMBER = '558899310129';
 
