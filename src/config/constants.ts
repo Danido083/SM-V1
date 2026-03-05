@@ -1,4 +1,5 @@
 // Configurações globais da aplicação
+import { ASSETS } from '../data/assets';
 
 /**
  * URL da API (Google Apps Script).
@@ -40,35 +41,35 @@ export const CATEGORY_MAP: Record<
         title: 'Nossos Picolés',
         color: 'bg-amber-50',
         description: 'O frescor da fruta no palito, direto do Ceará.',
-        img: 'https://i.imgur.com/mJfOgah.jpeg',
+        img: ASSETS.categories.picoles,
         filter: (c) => normalizeStr(c) === 'picole',
     },
     'potes-2l': {
         title: 'Potes de 2 Litros',
         color: 'bg-blue-50',
         description: 'Cremosidade em família para os melhores momentos.',
-        img: 'https://i.imgur.com/4YnqlcT.jpeg',
+        img: ASSETS.categories.potes2l,
         filter: (c) => normalizeStr(c) === 'pote' || normalizeStr(c) === 'potes',
     },
     acai: {
         title: 'Energia Açaí',
         color: 'bg-purple-50',
         description: 'O autêntico sabor da energia pura.',
-        img: 'https://i.imgur.com/VWPnpF8.jpeg',
+        img: ASSETS.categories.acai,
         filter: (c) => normalizeStr(c) === 'acai',
     },
     gourmet: {
         title: 'Linha Gourmet',
         color: 'bg-pink-50',
         description: 'Experiências exclusivas para paladares exigentes.',
-        img: 'https://i.imgur.com/o9FoKWl.jpeg',
+        img: ASSETS.categories.gourmet,
         filter: (c) => normalizeStr(c) === 'gourmet',
     },
     gelo: {
         title: 'Gelo Sabor',
         color: 'bg-cyan-50',
         description: 'Refrescância pura para os dias quentes.',
-        img: 'https://res.cloudinary.com/domma0qk3/image/upload/v1770150028/gelo_sabor_energetico-Photoroom_eiwshm.png',
+        img: ASSETS.categories.gelo,
         filter: (c) => normalizeStr(c) === 'gelo',
     },
 };

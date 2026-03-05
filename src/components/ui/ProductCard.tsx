@@ -1,7 +1,8 @@
-import React from 'react';
+import { type FC, type ElementType } from 'react';
 import { ChevronRight, Plus, Minus } from 'lucide-react';
 import { Product } from '../../features/catalog/types';
 import { Badge } from './Badge';
+
 
 interface ProductCardProps {
     product: Product;
@@ -13,12 +14,12 @@ interface ProductCardProps {
 }
 
 interface ControlBtnProps {
-    icon: React.ElementType;
+    icon: ElementType;
     onClick?: () => void;
     disabled?: boolean;
 }
 
-const ControlBtn: React.FC<ControlBtnProps> = ({ icon: Icon, onClick, disabled }) => (
+const ControlBtn: FC<ControlBtnProps> = ({ icon: Icon, onClick, disabled }) => (
     <button
         onClick={onClick}
         disabled={disabled}
@@ -28,7 +29,7 @@ const ControlBtn: React.FC<ControlBtnProps> = ({ icon: Icon, onClick, disabled }
     </button>
 );
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+export const ProductCard: FC<ProductCardProps> = ({
     product,
     variant = 'display',
     quantity = 0,
@@ -71,9 +72,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {!isAction ? (
                     <button
                         onClick={onDetails}
-                        className="w-full flex items-center justify-center gap-2 text-[#007ACC] font-bold text-xs py-3 border-2 border-[#007ACC]/10 rounded-2xl group-hover:bg-[#007ACC] group-hover:text-white transition-all"
+                        className="w-full flex items-center justify-center gap-3 bg-amber-400 text-[#007ACC] font-brand font-bold text-base py-4 rounded-3xl shadow-lg hover:bg-amber-500 hover:shadow-xl transition-all active:scale-95"
                     >
-                        Ver Sabores <ChevronRight size={14} />
+                        Ver Itens <ChevronRight size={18} />
                     </button>
                 ) : (
                     <div className="flex items-center justify-between bg-gray-100 rounded-2xl p-1">

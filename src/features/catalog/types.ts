@@ -1,7 +1,8 @@
 // Tipos do domínio de Catálogo
 
 export interface Product {
-  id: string | number;
+  /** Sempre string — evita key mismatch silencioso em Record<string, number> */
+  id: string;
   name: string;
   img: string;
   tag?: string;

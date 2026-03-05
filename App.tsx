@@ -1,63 +1,51 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronRight, Send, Loader2, ShoppingBasket, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { ChevronRight } from 'lucide-react';
 
+import { ASSETS } from './src/data/assets';
 import { Toast } from './src/components/ui/Toast';
+
 import { ProductCard } from './src/components/ui/ProductCard';
 import { Layout } from './src/components/Layout';
+import { OrderModal } from './src/features/checkout/components/OrderModal';
 import { useProducts } from './src/hooks/useProducts';
 import { useCart } from './src/hooks/useCart';
 import { useOrderSubmit } from './src/features/checkout/hooks/useOrderSubmit';
-import { CATEGORY_MAP, THEME } from './src/config/constants';
-import { LeadData } from './src/features/catalog/types';
-
-const INITIAL_LEAD: LeadData = { name: '', whatsapp: '', city: '' };
+import { CATEGORY_MAP } from './src/config/constants';
 
 const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [modalStep, setModalStep] = useState<'products' | 'lead'>('products');
-  const [leadForm, setLeadForm] = useState<LeadData>(INITIAL_LEAD);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastError, setToastError] = useState(false);
 
   const { products, isLoading } = useProducts();
   const { cart, totalItems, updateQty, clearCart } = useCart();
 
   // ─── Handlers de navegação ─────────────────────────────────────────────────
 
-  const openCategory = (key: string, step: 'products' | 'lead' = 'products') => {
-    setActiveCategory(key);
-    setModalStep(step);
-  };
+  const openCategory = (key: string) => setActiveCategory(key);
+  const closeModal = useCallback(() => setActiveCategory(null), []);
 
-  const closeModal = () => {
-    setActiveCategory(null);
-    setModalStep('products');
-  };
+  // ─── Callbacks estáveis para o hook de submit ──────────────────────────────
 
-  // ─── Hook de submissão (toda lógica de negócio encapsulada) ────────────────
+  const handleSuccess = useCallback(() => {
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 5000);
+    setTimeout(() => {
+      closeModal();
+      clearCart();
+    }, 1000);
+  }, [closeModal, clearCart]);
+
+  const handleError = useCallback(() => {
+    setToastError(true);
+    setTimeout(() => setToastError(false), 5000);
+  }, []);
 
   const { submit, isSubmitting } = useOrderSubmit(products, cart, {
-    onSuccess: () => {
-      setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 5000);
-      // O redirect para o WhatsApp já acontece dentro do hook
-      setTimeout(() => {
-        closeModal();
-        clearCart();
-        setLeadForm(INITIAL_LEAD);
-      }, 1000);
-    },
-    onError: () => {
-      alert('Erro ao enviar. Tente novamente.');
-    },
+    onSuccess: handleSuccess,
+    onError: handleError,
   });
-
-  // ─── Evento de submit do formulário ───────────────────────────────────────
-
-  const handleSubmitLead = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await submit(leadForm);
-  };
 
   // ─── Scroll listener ───────────────────────────────────────────────────────
 
@@ -77,8 +65,9 @@ const App: React.FC = () => {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <Layout scrolled={scrolled} onOpenQuote={() => openCategory('picoles', 'lead')}>
+    <Layout scrolled={scrolled} onOpenQuote={() => openCategory('picoles')}>
       <Toast message="Pedido enviado com sucesso!" visible={toastVisible} />
+      <Toast message="Erro ao enviar. Tente novamente." visible={toastError} variant="error" />
 
       {/* Hero */}
       <section className="min-h-screen flex items-center pt-24 overflow-hidden relative bg-[#007ACC]">
@@ -104,7 +93,7 @@ const App: React.FC = () => {
           </div>
           <div className="relative group animate-entrance" style={{ animationDelay: '0.2s' }}>
             <img
-              src="https://i.imgur.com/Xz2kNrl.jpeg"
+              src={ASSETS.heroProduct}
               alt="Produtos Mauriti"
               className="relative z-10 rounded-[4rem] shadow-2xl border-4 border-white/20 rotate-3 group-hover:rotate-0 transition-all duration-1000 w-full max-w-md mx-auto"
             />
@@ -127,128 +116,26 @@ const App: React.FC = () => {
                 key={key}
                 variant="display"
                 product={{ id: key, name: info.title, description: info.description, img: info.img, category: key }}
-                onDetails={() => openCategory(key, 'products')}
+                onDetails={() => openCategory(key)}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Modal */}
+      {/* Modal de cotação — componente isolado com SRP */}
       {activeCategory && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-blue-900/40 backdrop-blur-md animate-fadeIn">
-          <div
-            className={`bg-white w-full ${modalStep === 'products' ? 'max-w-5xl h-[85vh]' : 'max-w-md'
-              } ${THEME.radius} shadow-3xl flex flex-col overflow-hidden animate-entrance`}
-          >
-            {/* Modal Header */}
-            <div className="p-6 border-b flex justify-between items-center bg-gray-50/50">
-              <div>
-                <h3 className="text-2xl font-brand font-bold text-gray-800">
-                  {modalStep === 'products' ? CATEGORY_MAP[activeCategory].title : 'Finalizar Cotação'}
-                </h3>
-                {modalStep === 'products' && (
-                  <p className="text-xs text-gray-400 uppercase tracking-widest font-black">
-                    Adicione os sabores que deseja revender
-                  </p>
-                )}
-              </div>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-grow overflow-y-auto p-6 no-scrollbar">
-              {modalStep === 'products' ? (
-                isLoading ? (
-                  <div className="h-full flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="animate-spin text-[#007ACC]" size={40} />
-                    <p className="font-brand font-bold text-gray-400">Carregando catálogo...</p>
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredProducts.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        variant="action"
-                        product={p}
-                        quantity={cart[p.id] ?? 0}
-                        onAdd={() => updateQty(p.id, (cart[p.id] ?? 0) + 1)}
-                        onRemove={() => updateQty(p.id, (cart[p.id] ?? 0) - 1)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-gray-400 font-bold">
-                    Nenhum produto nesta categoria disponível no momento.
-                  </div>
-                )
-              ) : (
-                <form id="leadForm" onSubmit={handleSubmitLead} className="space-y-4">
-                  <p className="text-center text-gray-500 text-sm mb-6">
-                    Informe seus dados para receber nossa tabela de preços e condições de revenda.
-                  </p>
-                  {(['name', 'whatsapp', 'city'] as const).map((field) => (
-                    <div key={field}>
-                      <label className="text-[10px] font-black uppercase text-[#007ACC] block mb-1 ml-2">
-                        {field === 'name' ? 'Nome Completo' : field === 'whatsapp' ? 'WhatsApp' : 'Sua Cidade'}
-                      </label>
-                      <input
-                        required
-                        type={field === 'whatsapp' ? 'tel' : 'text'}
-                        className="w-full px-5 py-4 bg-gray-100 rounded-2xl outline-none border-2 border-transparent focus:border-[#007ACC] transition-all font-bold"
-                        placeholder={
-                          field === 'name'
-                            ? 'Ex: João Silva'
-                            : field === 'whatsapp'
-                              ? '(00) 00000-0000'
-                              : 'Ex: Mauriti - CE'
-                        }
-                        value={leadForm[field]}
-                        onChange={(e) => setLeadForm((prev) => ({ ...prev, [field]: e.target.value }))}
-                      />
-                    </div>
-                  ))}
-                </form>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-6 border-t bg-gray-50/50">
-              {modalStep === 'products' ? (
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-[#007ACC] text-white p-3 rounded-2xl shadow-lg">
-                      <ShoppingBasket size={24} />
-                    </div>
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-tighter text-gray-400">
-                        Itens Selecionados
-                      </p>
-                      <p className="text-xl font-brand font-bold text-[#007ACC]">{totalItems} sabores</p>
-                    </div>
-                  </div>
-                  <button
-                    disabled={totalItems === 0}
-                    onClick={() => setModalStep('lead')}
-                    className="w-full md:w-auto bg-[#007ACC] text-white px-10 py-5 rounded-2xl font-brand font-bold text-lg shadow-xl hover:bg-[#005c99] transition-all disabled:opacity-50 disabled:grayscale"
-                  >
-                    Concluir Cotação
-                  </button>
-                </div>
-              ) : (
-                <button
-                  form="leadForm"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#007ACC] text-white py-5 rounded-2xl font-brand font-bold text-xl shadow-xl flex items-center justify-center gap-3 hover:bg-[#005c99] transition-all disabled:opacity-50"
-                >
-                  {isSubmitting ? <Loader2 className="animate-spin" /> : <><Send size={20} /> Solicitar Orçamento</>}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <OrderModal
+          categoryKey={activeCategory}
+          products={filteredProducts}
+          isLoading={isLoading}
+          cart={cart}
+          totalItems={totalItems}
+          isSubmitting={isSubmitting}
+          onClose={closeModal}
+          onUpdateQty={updateQty}
+          onSubmit={submit}
+        />
       )}
     </Layout>
   );

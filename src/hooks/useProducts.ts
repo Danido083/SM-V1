@@ -17,36 +17,53 @@ export function useProducts(): UseProductsResult {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        console.log('Passo 5: useProducts montado - Iniciando busca de produtos');
         const controller = new AbortController();
+        let isMounted = true;
 
         const timeout = setTimeout(() => {
             controller.abort();
-            console.warn('⏱️ API demorou demais — usando fallback');
-            setProducts(FALLBACK_PRODUCTS);
-            setIsLoading(false);
-        }, 5000);
-
-        fetch(API_URL, { signal: controller.signal })
-            .then((res) => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                return res.json();
-            })
-            .then((data) => {
-                clearTimeout(timeout);
-                const productList: Product[] = Array.isArray(data) ? data : (data.products ?? []);
-                setProducts(productList.length > 0 ? productList : FALLBACK_PRODUCTS);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                clearTimeout(timeout);
-                if (error.name !== 'AbortError') {
-                    console.error('❌ Erro ao carregar produtos:', error);
-                }
+            console.warn('⏱️ Passo 5 Aviso: API demorou demais — forçando fallback de produtos');
+            if (isMounted) {
                 setProducts(FALLBACK_PRODUCTS);
                 setIsLoading(false);
-            });
+            }
+        }, 5000);
+
+        const fetchProducts = async () => {
+            try {
+                const res = await fetch(API_URL, { signal: controller.signal });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                const data = await res.json();
+
+                clearTimeout(timeout);
+                if (!isMounted) return;
+
+                const productList: Product[] = Array.isArray(data) ? data : (data?.products ?? []);
+                setProducts(productList.length > 0 ? productList : FALLBACK_PRODUCTS);
+                console.log('Passo 6: Produtos carregados com sucesso');
+            } catch (error: any) {
+                clearTimeout(timeout);
+                if (!isMounted) return;
+
+                if (error.name !== 'AbortError') {
+                    console.error('❌ Passo 6 Erro FATAL (Capturado): Fallback ativado. Erro ao buscar:', error);
+                }
+                // Previne Uncaught Promise Rejection definindo o fallback de forma segura
+                setProducts(FALLBACK_PRODUCTS);
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchProducts();
 
         return () => {
+            isMounted = false;
             clearTimeout(timeout);
             controller.abort();
         };
