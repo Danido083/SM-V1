@@ -23,7 +23,9 @@ const App: React.FC = () => {
 
   // ─── Handlers de navegação ─────────────────────────────────────────────────
 
-  const openCategory = (key: string) => setActiveCategory(key);
+  // Limpa o carrinho ao abrir qualquer categoria — evita "carrinho fantasma"
+  // onde itens de sessões/abas anteriores aparecem no contador mas somem na revisão.
+  const openCategory = (key: string) => { clearCart(); setActiveCategory(key); };
   const closeModal = useCallback(() => setActiveCategory(null), []);
 
   // ─── Callbacks estáveis para o hook de submit ──────────────────────────────
