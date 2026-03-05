@@ -4,10 +4,12 @@ type Cart = Record<string, number>;
 
 const CART_STORAGE_KEY = 'mauriti:cart';
 
-/** Carrega o carrinho do localStorage de forma segura. */
+/** Carrega o carrinho do sessionStorage de forma segura.
+ *  sessionStorage é ZERADO ao fechar o browser/aba — sem "carrinho fantasma" entre sessões.
+ */
 function loadCartFromStorage(): Cart {
     try {
-        const raw = localStorage.getItem(CART_STORAGE_KEY);
+        const raw = sessionStorage.getItem(CART_STORAGE_KEY);
         return raw ? (JSON.parse(raw) as Cart) : {};
     } catch {
         return {};
@@ -28,9 +30,9 @@ interface UseCartResult {
 export function useCart(): UseCartResult {
     const [cart, setCart] = useState<Cart>(loadCartFromStorage);
 
-    // ─── Persistência ────────────────────────────────────────────────────────
+    // ─── Persistência (sessionStorage) ───────────────────────────────────────
     useEffect(() => {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+        sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     }, [cart]);
 
     // ─── Derivados ───────────────────────────────────────────────────────────

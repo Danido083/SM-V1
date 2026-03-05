@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { ASSETS } from './src/data/assets';
 import { Toast } from './src/components/ui/Toast';
-
+import { CartDrawer } from './src/components/ui/CartDrawer';
 import { ProductCard } from './src/components/ui/ProductCard';
 import { Layout } from './src/components/Layout';
 import { OrderModal } from './src/features/checkout/components/OrderModal';
@@ -23,10 +23,16 @@ const App: React.FC = () => {
 
   // ─── Handlers de navegação ─────────────────────────────────────────────────
 
-  // Limpa o carrinho ao abrir qualquer categoria — evita "carrinho fantasma"
-  // onde itens de sessões/abas anteriores aparecem no contador mas somem na revisão.
-  const openCategory = (key: string) => { clearCart(); setActiveCategory(key); };
+  // Não limpa o carrinho ao trocar de categoria — suporte multi-linha ativo
+  const openCategory = (key: string) => setActiveCategory(key);
   const closeModal = useCallback(() => setActiveCategory(null), []);
+
+  // Abre o modal de lead direto pelo CartDrawer (sem selecionar categoria nova)
+  const openCheckout = useCallback(() => {
+    // Abre na primeira categoria que tiver item no carrinho
+    const firstCategory = products.find((p) => (cart[p.id] ?? 0) > 0)?.category ?? 'picoles';
+    setActiveCategory(firstCategory);
+  }, [products, cart]);
 
   // ─── Callbacks estáveis para o hook de submit ──────────────────────────────
 
@@ -130,6 +136,7 @@ const App: React.FC = () => {
         <OrderModal
           categoryKey={activeCategory}
           products={filteredProducts}
+          allProducts={products}
           isLoading={isLoading}
           cart={cart}
           totalItems={totalItems}
@@ -139,6 +146,15 @@ const App: React.FC = () => {
           onSubmit={submit}
         />
       )}
+
+      {/* Carrinho flutuante de acompanhamento multi-categoria */}
+      <CartDrawer
+        cart={cart}
+        allProducts={products}
+        totalItems={totalItems}
+        onUpdateQty={updateQty}
+        onCheckout={openCheckout}
+      />
     </Layout>
   );
 };

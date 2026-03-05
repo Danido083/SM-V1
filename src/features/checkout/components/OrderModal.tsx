@@ -37,6 +37,7 @@ const LEAD_FIELD_CONFIG: Record<
 interface OrderModalProps {
     categoryKey: string;
     products: Product[];
+    allProducts: Product[];
     isLoading: boolean;
     cart: Record<string, number>;
     totalItems: number;
@@ -53,6 +54,7 @@ const INITIAL_LEAD: LeadData = { name: '', whatsapp: '', city: '' };
 export const OrderModal: FC<OrderModalProps> = ({
     categoryKey,
     products,
+    allProducts,
     isLoading,
     cart,
     totalItems,
@@ -141,8 +143,8 @@ export const OrderModal: FC<OrderModalProps> = ({
                         )
                     ) : step === 'review' ? (
                         <div className="space-y-4 px-2">
-                            {products.filter(p => cart[p.id] > 0).length > 0 ? (
-                                products.filter(p => cart[p.id] > 0).map(p => (
+                            {allProducts.filter(p => (cart[p.id] ?? 0) > 0).length > 0 ? (
+                                allProducts.filter(p => (cart[p.id] ?? 0) > 0).map(p => (
                                     <div key={p.id} className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-[2rem] border border-gray-100/50 hover:bg-white transition-all shadow-sm">
                                         <div className="w-16 h-16 rounded-2xl overflow-hidden bg-white shadow-inner flex-shrink-0 border border-gray-100">
                                             {p.img ? (
